@@ -1,0 +1,18 @@
+{
+  "name": "pow-cards-nodejs",
+  "version": "1.0.0",
+  "description": "POW Cards Node.js Server",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+} 
