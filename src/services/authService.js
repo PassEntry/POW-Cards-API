@@ -4,7 +4,7 @@ class AuthService {
     createSignInData(domain) {
         return {
             domain,
-            statement: "Sign in with your Solana account",
+            statement: "Sign in and create Solana POW Card",
             nonce: generateNonce(),
             issuedAt: new Date().toISOString(),
         };
