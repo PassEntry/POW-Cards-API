@@ -4,14 +4,12 @@ const authService = require('../../services/authService');
 const TEST_CONSTANTS = {
     MOCKED_NONCE: 'mockedNonce123',
     MOCKED_TIMESTAMP: '2024-03-14T12:00:00Z',
-    SIGN_IN_STATEMENT: 'Sign in and create Solana POW Card',
     TEST_DOMAIN: 'test.com'
 };
 
 jest.mock('../../services/authService', () => ({
     createSignInData: jest.fn().mockReturnValue({
         domain: TEST_CONSTANTS.TEST_DOMAIN,
-        statement: TEST_CONSTANTS.SIGN_IN_STATEMENT,
         nonce: TEST_CONSTANTS.MOCKED_NONCE,
         issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP
     })
@@ -45,7 +43,6 @@ describe('AuthController', () => {
         
         expect(mockResponse.json).toHaveBeenCalledWith({
             domain: TEST_CONSTANTS.TEST_DOMAIN,
-            statement: TEST_CONSTANTS.SIGN_IN_STATEMENT,
             nonce: TEST_CONSTANTS.MOCKED_NONCE,
             issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP
         });
