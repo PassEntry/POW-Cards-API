@@ -4,7 +4,7 @@
   "description": "POW Cards Node.js Server",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
+    "start": "NODE_NO_WARNINGS=1 node src/server.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
