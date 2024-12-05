@@ -4,8 +4,13 @@ class AuthController {
     createSignInData(req, res) {
         try {
             const domain = req.headers.host;
-            const signInData = authService.createSignInData(domain);
-            
+            const publicKey = req.query.publicKey;
+
+            if (!publicKey) {
+                return res.status(400).json({ error: 'Public key is required' });
+            }
+
+            const signInData = authService.createSignInData(domain, publicKey);
             res.status(200).json(signInData);
         } catch (error) {
             console.error('Error creating sign-in data:', error);

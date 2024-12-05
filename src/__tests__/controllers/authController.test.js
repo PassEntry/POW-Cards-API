@@ -4,7 +4,8 @@ const authService = require('../../services/authService');
 const TEST_CONSTANTS = {
     MOCKED_NONCE: 'mockedNonce123',
     MOCKED_TIMESTAMP: '2024-03-14T12:00:00Z',
-    TEST_DOMAIN: 'test.com'
+    TEST_DOMAIN: 'test.com',
+    TEST_PUBLIC_KEY: 'testPublicKey123'
 };
 
 jest.mock('../../services/authService', () => ({
@@ -24,6 +25,9 @@ describe('AuthController', () => {
         mockRequest = {
             headers: {
                 host: TEST_CONSTANTS.TEST_DOMAIN
+            },
+            query: {
+                publicKey: TEST_CONSTANTS.TEST_PUBLIC_KEY
             }
         };
         mockResponse = {
@@ -35,7 +39,10 @@ describe('AuthController', () => {
     test('createSignInData returns 200 status', () => {
         authController.createSignInData(mockRequest, mockResponse);
         expect(mockResponse.status).toHaveBeenCalledWith(200);
-        expect(authService.createSignInData).toHaveBeenCalledWith(TEST_CONSTANTS.TEST_DOMAIN);
+        expect(authService.createSignInData).toHaveBeenCalledWith(
+            TEST_CONSTANTS.TEST_DOMAIN,
+            TEST_CONSTANTS.TEST_PUBLIC_KEY
+        );
     });
 
     test('createSignInData returns correct data structure', () => {
@@ -49,6 +56,10 @@ describe('AuthController', () => {
     });
 
     test('createSignInData handles errors', () => {
+        // First ensure the mock request has the required publicKey
+        mockRequest.query.publicKey = TEST_CONSTANTS.TEST_PUBLIC_KEY;
+        
+        // Then mock the service to throw our intended error
         authService.createSignInData.mockImplementationOnce(() => {
             throw new Error('Service error');
         });
@@ -58,6 +69,18 @@ describe('AuthController', () => {
         expect(mockResponse.status).toHaveBeenCalledWith(500);
         expect(mockResponse.json).toHaveBeenCalledWith({
             error: 'Internal server error'
+        });
+    });
+
+    test('createSignInData handles missing publicKey', () => {
+        // Remove publicKey from request
+        delete mockRequest.query.publicKey;
+        
+        authController.createSignInData(mockRequest, mockResponse);
+        
+        expect(mockResponse.status).toHaveBeenCalledWith(400);
+        expect(mockResponse.json).toHaveBeenCalledWith({
+            error: 'Public key is required'
         });
     });
 }); 
