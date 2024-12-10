@@ -1,23 +1,17 @@
-const authService = require('../../services/authService');
-const { generateNonce } = require('../../utils/nonceGenerator');
-const nacl = require('tweetnacl');
-const { PublicKey, Keypair } = require('@solana/web3.js');
-const bs58 = require('bs58');
-
-const TEST_CONSTANTS = {
-    MOCKED_NONCE: 'mockedNonce123',
-    TEST_DOMAIN: 'test.com'
-};
-
-jest.mock('../../utils/nonceGenerator', () => ({
-    generateNonce: jest.fn().mockReturnValue(TEST_CONSTANTS.MOCKED_NONCE)
-}));
+import authService from '../../services/authService';
+import * as nonceGenerator from '../../utils/nonceGenerator';
+import nacl from 'tweetnacl';
+import { Keypair } from '@solana/web3.js';
+import bs58 from 'bs58';
+import { TEST_CONSTANTS } from '../testConstants';
 
 describe('AuthService', () => {
-    let originalDateNow;
+    let originalDateNow: typeof Date.now;
 
     beforeEach(() => {
         jest.clearAllMocks();
+        // Mock generateNonce
+        jest.spyOn(nonceGenerator, 'generateNonce').mockReturnValue(TEST_CONSTANTS.MOCKED_NONCE);
         // Mock Date.now() to return a fixed timestamp
         originalDateNow = Date.now;
         Date.now = jest.fn(() => 1647259200000); // 2022-03-14T12:00:00.000Z
@@ -26,10 +20,11 @@ describe('AuthService', () => {
     afterEach(() => {
         // Restore original Date.now
         Date.now = originalDateNow;
+        jest.restoreAllMocks();
     });
 
     describe('createSignInData', () => {
-        let testKeypair;
+        let testKeypair: Keypair;
 
         beforeEach(() => {
             testKeypair = Keypair.generate();
@@ -46,32 +41,35 @@ describe('AuthService', () => {
                 nonce: TEST_CONSTANTS.MOCKED_NONCE,
                 issuedAt: expect.any(String)
             });
-            expect(generateNonce).toHaveBeenCalledTimes(1);
+            expect(nonceGenerator.generateNonce).toHaveBeenCalledTimes(1);
         });
 
         test('stores nonce with expiration and public key', () => {
             const publicKey = testKeypair.publicKey.toBase58();
             const result = authService.createSignInData(TEST_CONSTANTS.TEST_DOMAIN, publicKey);
-            const storedNonce = authService.usedNonces.get(result.nonce);
+            const storedNonce = (authService as any).usedNonces.get(result.nonce);
 
             expect(storedNonce).toBeDefined();
             expect(storedNonce).toEqual({
                 issuedAt: expect.any(String),
-                expiresAt: Date.now() + authService.nonceExpiration,
+                expiresAt: Date.now() + (authService as any).nonceExpiration,
                 publicKey
             });
         });
 
         test('generates valid ISO timestamp', () => {
-            const result = authService.createSignInData(TEST_CONSTANTS.TEST_DOMAIN);
+            const result = authService.createSignInData(
+                TEST_CONSTANTS.TEST_DOMAIN,
+                testKeypair.publicKey.toBase58()
+            );
             expect(() => new Date(result.issuedAt)).not.toThrow();
         });
     });
 
     describe('verifySignIn', () => {
-        let keypair;
-        let message;
-        let signature;
+        let keypair: Keypair;
+        let message: string;
+        let signature: Uint8Array;
 
         beforeEach(() => {
             // Create a test keypair
@@ -87,16 +85,16 @@ Issued At: 2024-03-14T12:00:00Z`;
             signature = nacl.sign.detached(messageBytes, keypair.secretKey);
 
             // Store the nonce as if it was just created
-            authService.usedNonces.set(TEST_CONSTANTS.MOCKED_NONCE, {
+            (authService as any).usedNonces.set(TEST_CONSTANTS.MOCKED_NONCE, {
                 issuedAt: new Date().toISOString(),
-                expiresAt: Date.now() + authService.nonceExpiration,
+                expiresAt: Date.now() + (authService as any).nonceExpiration,
                 publicKey: keypair.publicKey.toBase58()
             });
         });
 
         afterEach(() => {
             // Clear nonces after each test
-            authService.usedNonces.clear();
+            (authService as any).usedNonces.clear();
         });
 
         test('should verify valid signature', async () => {
@@ -109,7 +107,7 @@ Issued At: 2024-03-14T12:00:00Z`;
             expect(result.verified).toBe(true);
             expect(result.reason).toBeNull();
             // Verify nonce was deleted after use
-            expect(authService.usedNonces.has(TEST_CONSTANTS.MOCKED_NONCE)).toBe(false);
+            expect((authService as any).usedNonces.has(TEST_CONSTANTS.MOCKED_NONCE)).toBe(false);
         });
 
         test('should reject invalid signature', async () => {
@@ -130,9 +128,9 @@ Issued At: 2024-03-14T12:00:00Z`;
             const wrongKeypair = Keypair.generate();
             
             // Update stored nonce to match the wrong keypair
-            authService.usedNonces.set(TEST_CONSTANTS.MOCKED_NONCE, {
+            (authService as any).usedNonces.set(TEST_CONSTANTS.MOCKED_NONCE, {
                 issuedAt: new Date().toISOString(),
-                expiresAt: Date.now() + authService.nonceExpiration,
+                expiresAt: Date.now() + (authService as any).nonceExpiration,
                 publicKey: wrongKeypair.publicKey.toBase58()
             });
 
@@ -148,7 +146,7 @@ Issued At: 2024-03-14T12:00:00Z`;
 
         test('should reject expired nonce', async () => {
             // Set nonce as expired
-            authService.usedNonces.set(TEST_CONSTANTS.MOCKED_NONCE, {
+            (authService as any).usedNonces.set(TEST_CONSTANTS.MOCKED_NONCE, {
                 issuedAt: new Date().toISOString(),
                 expiresAt: Date.now() - 1000 // Expired 1 second ago
             });
@@ -162,12 +160,12 @@ Issued At: 2024-03-14T12:00:00Z`;
             expect(result.verified).toBe(false);
             expect(result.reason).toBe('Nonce has expired');
             // Verify expired nonce was deleted
-            expect(authService.usedNonces.has(TEST_CONSTANTS.MOCKED_NONCE)).toBe(false);
+            expect((authService as any).usedNonces.has(TEST_CONSTANTS.MOCKED_NONCE)).toBe(false);
         });
 
         test('should reject unknown nonce', async () => {
             // Clear the nonce from storage
-            authService.usedNonces.clear();
+            (authService as any).usedNonces.clear();
 
             const result = await authService.verifySignIn(
                 message,
@@ -186,7 +184,7 @@ ${keypair.publicKey.toBase58()}
 Issued At: 2024-03-14T12:00:00Z`;
 
             // Clear existing nonce
-            authService.usedNonces.clear();
+            (authService as any).usedNonces.clear();
 
             const messageBytes = new TextEncoder().encode(malformedMessage);
             const malformedSignature = nacl.sign.detached(messageBytes, keypair.secretKey);
@@ -201,4 +199,4 @@ Issued At: 2024-03-14T12:00:00Z`;
             expect(result.reason).toBe('Invalid or expired nonce');
         });
     });
-}); 
+});

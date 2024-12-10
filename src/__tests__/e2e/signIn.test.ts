@@ -1,13 +1,10 @@
-const request = require('supertest');
-const app = require('../../server');
-const { Keypair } = require('@solana/web3.js');
-
-const TEST_CONSTANTS = {
-    TEST_DOMAIN: 'test-domain.com'
-};
+import request from 'supertest';
+import { app } from '../../server';
+import { Keypair } from '@solana/web3.js';
+import { TEST_CONSTANTS } from '../testConstants';
 
 describe('Sign In Flow E2E', () => {
-    let testKeypair;
+    let testKeypair: Keypair;
 
     beforeEach(() => {
         testKeypair = Keypair.generate();
