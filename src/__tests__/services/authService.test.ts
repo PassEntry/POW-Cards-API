@@ -10,15 +10,12 @@ describe('AuthService', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        // Mock generateNonce
         jest.spyOn(nonceGenerator, 'generateNonce').mockReturnValue(TEST_CONSTANTS.MOCKED_NONCE);
-        // Mock Date.now() to return a fixed timestamp
         originalDateNow = Date.now;
         Date.now = jest.fn(() => 1647259200000); // 2022-03-14T12:00:00.000Z
     });
 
     afterEach(() => {
-        // Restore original Date.now
         Date.now = originalDateNow;
         jest.restoreAllMocks();
     });
@@ -183,7 +180,6 @@ ${keypair.publicKey.toBase58()}
 
 Issued At: 2024-03-14T12:00:00Z`;
 
-            // Clear existing nonce
             (authService as any).usedNonces.clear();
 
             const messageBytes = new TextEncoder().encode(malformedMessage);

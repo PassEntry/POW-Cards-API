@@ -13,7 +13,6 @@ describe('AuthController', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         
-        // Mock console.error
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         
         const mockedAuthService = jest.mocked(authService, { shallow: false });
