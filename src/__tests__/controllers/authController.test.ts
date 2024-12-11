@@ -86,7 +86,8 @@ describe('AuthController', () => {
         );
         expect(mockResponse.status).toHaveBeenCalledWith(500);
         expect(mockResponse.json).toHaveBeenCalledWith({
-            error: 'Internal server error'
+            error: 'Internal server error',
+            details: 'Failed to create sign-in data'
         });
     });
 
@@ -100,7 +101,8 @@ describe('AuthController', () => {
         
         expect(mockResponse.status).toHaveBeenCalledWith(400);
         expect(mockResponse.json).toHaveBeenCalledWith({
-            error: 'Public key is required'
+            error: 'Invalid request',
+            details: 'Public key is required'
         });
     });
 
@@ -113,9 +115,11 @@ describe('AuthController', () => {
             };
         });
 
-        test('verifySignIn returns 200 status with valid data', async () => {
-            const mockVerifyResult = { verified: true, reason: null };
-            jest.mocked(authService).verifySignIn.mockResolvedValueOnce(mockVerifyResult);
+        test('returns downloadUrl on successful verification', async () => {
+            const mockDownloadUrl = 'https://example.com/pass';
+            jest.mocked(authService).verifySignIn.mockResolvedValueOnce({ 
+                downloadUrl: mockDownloadUrl 
+            });
 
             await authController.verifySignIn(
                 mockRequest as Request, 
@@ -123,20 +127,25 @@ describe('AuthController', () => {
             );
 
             expect(mockResponse.status).toHaveBeenCalledWith(200);
-            expect(mockResponse.json).toHaveBeenCalledWith(mockVerifyResult);
+            expect(mockResponse.json).toHaveBeenCalledWith({ 
+                downloadUrl: mockDownloadUrl 
+            });
         });
 
-        test('verifySignIn handles missing fields', async () => {
-            delete mockRequest.body.signature;
+        test('returns 401 on verification failure', async () => {
+            jest.mocked(authService).verifySignIn.mockResolvedValueOnce({ 
+                reason: 'Invalid signature' 
+            });
 
             await authController.verifySignIn(
                 mockRequest as Request, 
                 mockResponse as Response
             );
 
-            expect(mockResponse.status).toHaveBeenCalledWith(400);
+            expect(mockResponse.status).toHaveBeenCalledWith(401);
             expect(mockResponse.json).toHaveBeenCalledWith({
-                error: 'Missing required fields'
+                error: 'Verification failed',
+                details: 'Invalid signature'
             });
         });
 
@@ -156,7 +165,26 @@ describe('AuthController', () => {
             );
             expect(mockResponse.status).toHaveBeenCalledWith(500);
             expect(mockResponse.json).toHaveBeenCalledWith({
-                error: 'Internal server error'
+                error: 'Internal server error',
+                details: 'Failed to process verification request'
+            });
+        });
+
+        test('verifySignIn handles malformed JSON in request', async () => {
+            const malformedRequest = {
+                ...mockRequest,
+                body: 'invalid json'
+            };
+
+            await authController.verifySignIn(
+                malformedRequest as Request, 
+                mockResponse as Response
+            );
+
+            expect(mockResponse.status).toHaveBeenCalledWith(400);
+            expect(mockResponse.json).toHaveBeenCalledWith({
+                error: 'Invalid request',
+                details: 'Invalid request format'
             });
         });
     });

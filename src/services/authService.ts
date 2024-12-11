@@ -2,6 +2,7 @@ import { generateNonce } from '../utils/nonceGenerator';
 import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 import { PublicKey } from '@solana/web3.js';
+import passService from './passService';
 
 interface SignInData {
   domain: string;
@@ -10,14 +11,19 @@ interface SignInData {
 }
 
 interface VerifyResult {
-  verified: boolean;
-  reason: string | null;
+  success: boolean;
+  reason?: string;
 }
 
 interface NonceData {
   issuedAt: string;
   expiresAt: number;
   publicKey: string;
+}
+
+interface ClaimResponse {
+  downloadUrl?: string;
+  reason?: string;
 }
 
 class AuthService {
@@ -41,84 +47,103 @@ class AuthService {
     return { domain, nonce, issuedAt };
   }
 
-  async verifySignIn(message: string, signature: string, publicKeyStr: string): Promise<VerifyResult> {
+  async verifySignIn(message: string, signature: string, publicKeyStr: string): Promise<ClaimResponse> {
     try {
-      // Extract nonce from message
-      const nonceMatch = message.match(/Nonce: ([A-Za-z0-9]+)/);
-      if (!nonceMatch) {
-        return {
-          verified: false,
-          reason: 'Invalid or expired nonce'
-        };
-      }
-      const messageNonce = nonceMatch[1];
-
-      // Verify nonce exists and hasn't expired
-      const nonceData = this.usedNonces.get(messageNonce);
-      if (!nonceData) {
-        return {
-          verified: false,
-          reason: 'Invalid or expired nonce'
-        };
-      }
-
-      // Check if nonce has expired
-      if (Date.now() > nonceData.expiresAt) {
-        this.usedNonces.delete(messageNonce);
-        return {
-          verified: false,
-          reason: 'Nonce has expired'
-        };
-      }
-
-      // Check if nonce was issued for this public key
-      if (nonceData.publicKey && nonceData.publicKey !== publicKeyStr) {
-        this.usedNonces.delete(messageNonce);
-        return {
-          verified: false,
-          reason: 'Nonce was not issued for this public key'
-        };
-      }
-
-      // Delete nonce after use
-      this.usedNonces.delete(messageNonce);
-
-      // 1. Convert the public key string to a PublicKey object
-      const publicKey = new PublicKey(publicKeyStr);
+      const verificationResult = await this.verifySignature(message, signature, publicKeyStr);
       
-      // 2. Convert the message to Uint8Array (same as we did in frontend)
-      const messageBytes = new TextEncoder().encode(message);
-      
-      // 3. Decode the base58 signature
-      const signatureBytes = bs58.decode(signature);
-      
-      // 4. Verify the signature
-      const isValid = await PublicKey.isOnCurve(publicKey.toBytes()) && 
-                    nacl.sign.detached.verify(
-                      messageBytes,
-                      signatureBytes,
-                      publicKey.toBytes()
-                    );
+      if (!verificationResult.success) {
+        return { reason: verificationResult.reason };
+      }
 
-      // 5. Extract public key from message
-      const addressMatch = message.match(/^.*:\n([A-Za-z0-9]+)/m);
-      const messageAddress = addressMatch ? addressMatch[1] : null;
+      // Only create pass if verification succeeded
+      const downloadUrl = await passService.createWalletPass(publicKeyStr);
+      return { downloadUrl };
 
-      // 6. Verify all conditions
-      return {
-        verified: isValid && 
-                 messageAddress === publicKeyStr,
-        reason: !isValid ? 'Invalid signature' :
-                messageAddress !== publicKeyStr ? 'Public key mismatch' :
-                null
-      };
     } catch (error) {
-      console.error('Signature verification error:', error);
+      console.error('Verification or pass creation error:', error);
+      // Only return reason for verification failures, throw other errors
+      if (error instanceof Error && (error as any).isVerificationError) {
+        return { reason: error.message };
+      }
+      throw error; // Let the controller handle pass creation errors
+    }
+  }
+
+  private async verifySignature(message: string, signature: string, publicKeyStr: string): Promise<VerifyResult> {
+    // Extract and verify nonce
+    const nonceVerification = this.verifyNonce(message, publicKeyStr);
+    if (!nonceVerification.success) {
+      return nonceVerification;
+    }
+
+    // Verify signature
+    const publicKey = new PublicKey(publicKeyStr);
+    const messageBytes = new TextEncoder().encode(message);
+    const signatureBytes = bs58.decode(signature);
+    
+    const isValid = await PublicKey.isOnCurve(publicKey.toBytes()) && 
+                  nacl.sign.detached.verify(
+                    messageBytes,
+                    signatureBytes,
+                    publicKey.toBytes()
+                  );
+
+    // Verify message address
+    const addressMatch = message.match(/^.*:\n([A-Za-z0-9]+)/m);
+    const messageAddress = addressMatch ? addressMatch[1] : null;
+
+    if (!isValid || messageAddress !== publicKeyStr) {
       return {
-        verified: false,
-        reason: 'Invalid signature data'
+        success: false,
+        reason: !isValid ? 'Invalid signature' : 'Public key mismatch'
       };
     }
+
+    return { success: true };
+  }
+
+  private verifyNonce(message: string, publicKeyStr: string): VerifyResult {
+    // Extract nonce from message
+    const nonceMatch = message.match(/Nonce: ([A-Za-z0-9]+)/);
+    if (!nonceMatch) {
+      return {
+        success: false,
+        reason: 'Invalid or expired nonce'
+      };
+    }
+    const messageNonce = nonceMatch[1];
+
+    // Verify nonce exists and hasn't expired
+    const nonceData = this.usedNonces.get(messageNonce);
+    if (!nonceData) {
+      return {
+        success: false,
+        reason: 'Invalid or expired nonce'
+      };
+    }
+
+    // Check if nonce has expired
+    if (Date.now() > nonceData.expiresAt) {
+      this.usedNonces.delete(messageNonce);
+      return {
+        success: false,
+        reason: 'Nonce has expired'
+      };
+    }
+
+    // Check if nonce was issued for this public key
+    if (nonceData.publicKey && nonceData.publicKey !== publicKeyStr) {
+      this.usedNonces.delete(messageNonce);
+      return {
+        success: false,
+        reason: 'Nonce was not issued for this public key'
+      };
+    }
+
+    // Delete nonce after use
+    this.usedNonces.delete(messageNonce);
+
+    return { success: true };
   }
 }
 
