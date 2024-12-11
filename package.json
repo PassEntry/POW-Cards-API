@@ -4,9 +4,9 @@
   "description": "POW Cards Node.js Server",
   "main": "dist/server.js",
   "scripts": {
-    "start": "NODE_NO_WARNINGS=1 ts-node -P tsconfig.json src/server.ts",
+    "start": "NODE_NO_WARNINGS=1 ts-node -r dotenv/config -P tsconfig.json src/server.ts",
     "build": "tsc",
-    "dev": "ts-node-dev -P tsconfig.json src/server.ts",
+    "dev": "ts-node-dev -r dotenv/config -P tsconfig.json src/server.ts",
     "test": "jest"
   },
   "keywords": [],

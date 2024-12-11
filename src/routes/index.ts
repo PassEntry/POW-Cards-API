@@ -1,5 +1,5 @@
 import express from 'express';
-import signInRoutes from './signInRoutes';
+import signInRoutes from './claimRoutes';
 
 const router = express.Router();
 
