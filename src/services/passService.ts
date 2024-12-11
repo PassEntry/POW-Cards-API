@@ -14,7 +14,7 @@ export class PassService {
 
   async createWalletPass(address: string): Promise<string> {
     try {
-        const requestUrl = `${this.API_URL}?passTemplate=${this.TEMPLATE_ID}`;
+        const requestUrl = `${this.API_URL}?passTemplate=${this.TEMPLATE_ID}&extId=${address}`;
         const authHeader = `Bearer ${this.API_KEY}`;
         
         const response = await fetch(requestUrl, {
@@ -25,8 +25,14 @@ export class PassService {
             },
             body: JSON.stringify({
                 pass: {
-                    nfc: { enabled: true },
-                    address
+                    nfc: { 
+                        enabled: true,
+                        source: "extId"
+                     },
+                    qr: {
+                        value: address
+                    },
+                    address: address,
                 }
             }),
         });
