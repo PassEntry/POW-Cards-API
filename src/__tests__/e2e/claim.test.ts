@@ -22,7 +22,7 @@ describe('Claim Flow E2E', () => {
         console.error = jest.fn();
 
         // Mock successful pass creation
-        jest.mocked(passService.createWalletPass).mockResolvedValue(mockDownloadUrl);
+        jest.mocked(passService.getOrCreateWalletPass).mockResolvedValue(mockDownloadUrl);
     });
 
     afterEach(() => {
@@ -139,7 +139,7 @@ Issued At: ${issuedAt}`;
 
         test('should handle pass creation failure', async () => {
             // Mock pass creation failure
-            jest.mocked(passService.createWalletPass).mockRejectedValueOnce(
+            jest.mocked(passService.getOrCreateWalletPass).mockRejectedValueOnce(
                 Object.assign(new Error('Failed to create pass'), { details: 'Service unavailable' })
             );
 

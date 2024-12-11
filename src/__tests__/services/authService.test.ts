@@ -22,7 +22,7 @@ describe('AuthService', () => {
         console.error = jest.fn(); // Silence console.error
 
         // Mock successful pass creation
-        jest.mocked(passService.createWalletPass).mockResolvedValue(mockDownloadUrl);
+        jest.mocked(passService.getOrCreateWalletPass).mockResolvedValue(mockDownloadUrl);
     });
 
     afterEach(() => {
@@ -109,7 +109,7 @@ Issued At: 2024-03-14T12:00:00Z`;
             expect(result).toEqual({
                 downloadUrl: mockDownloadUrl
             });
-            expect(passService.createWalletPass).toHaveBeenCalledWith(
+            expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
                 keypair.publicKey.toBase58()
             );
         });
@@ -121,7 +121,7 @@ Issued At: 2024-03-14T12:00:00Z`;
                 { details: 'Service unavailable' }
             );
             
-            jest.mocked(passService.createWalletPass).mockRejectedValueOnce(mockError);
+            jest.mocked(passService.getOrCreateWalletPass).mockRejectedValueOnce(mockError);
 
             await expect(authService.verifySignIn(
                 message,
@@ -142,7 +142,7 @@ Issued At: 2024-03-14T12:00:00Z`;
                 { isVerificationError: true }
             );
             
-            jest.mocked(passService.createWalletPass).mockRejectedValueOnce(verificationError);
+            jest.mocked(passService.getOrCreateWalletPass).mockRejectedValueOnce(verificationError);
 
             const result = await authService.verifySignIn(
                 message,

@@ -26,6 +26,87 @@ describe('PassService', () => {
         delete process.env.PASSENTRY_API_KEY;
     });
 
+    describe('getOrCreateWalletPass', () => {
+        test('should return existing pass if found', async () => {
+            global.fetch = jest.fn().mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    data: {
+                        attributes: {
+                            downloadUrl: mockDownloadUrl,
+                            status: 'active'
+                        }
+                    }
+                })
+            });
+
+            const result = await passService.getOrCreateWalletPass(mockAddress);
+
+            expect(result).toBe(mockDownloadUrl);
+            expect(global.fetch).toHaveBeenCalledWith(
+                `https://api.passentry.com/api/v1/passes/${mockAddress}`,
+                expect.objectContaining({
+                    method: 'GET',
+                    headers: {
+                        'Authorization': expect.stringContaining('Bearer ')
+                    }
+                })
+            );
+        });
+
+        test('should create new pass if not found', async () => {
+            // Mock GET request to return 404
+            global.fetch = jest.fn()
+                .mockResolvedValueOnce({
+                    ok: false,
+                    status: 404,
+                    statusText: 'Not Found',
+                    text: () => Promise.resolve('Not found')
+                })
+                // Mock POST request for creating new pass
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        data: {
+                            attributes: {
+                                downloadUrl: mockDownloadUrl,
+                                status: 'issued'
+                            }
+                        }
+                    })
+                });
+
+            const result = await passService.getOrCreateWalletPass(mockAddress);
+
+            expect(result).toBe(mockDownloadUrl);
+            expect(global.fetch).toHaveBeenCalledTimes(2);
+        });
+
+        test('should throw error on non-404 fetch failure', async () => {
+            const errorMessage = 'Internal server error';
+            
+            global.fetch = jest.fn().mockResolvedValueOnce({
+                ok: false,
+                status: 500,
+                statusText: 'Internal Server Error',
+                text: () => Promise.resolve(errorMessage)
+            });
+
+            await expect(passService.getOrCreateWalletPass(mockAddress))
+                .rejects
+                .toThrow('Failed to fetch wallet pass');
+
+            expect(consoleErrorSpy).toHaveBeenCalledWith(
+                'Wallet pass fetch failed:',
+                expect.objectContaining({
+                    status: 500,
+                    statusText: 'Internal Server Error',
+                    error: errorMessage
+                })
+            );
+        });
+    });
+
     test('createWalletPass should create pass successfully', async () => {
         global.fetch = jest.fn().mockResolvedValueOnce({
             ok: true,
@@ -43,7 +124,7 @@ describe('PassService', () => {
 
         expect(result).toBe(mockDownloadUrl);
         expect(global.fetch).toHaveBeenCalledWith(
-            expect.stringContaining('https://api.passentry.com/api/v1/passes'),
+            `${passService['API_URL']}?passTemplate=${passService['TEMPLATE_ID']}&extId=${mockAddress}`,
             expect.objectContaining({
                 method: 'POST',
                 headers: {
@@ -52,7 +133,13 @@ describe('PassService', () => {
                 },
                 body: JSON.stringify({
                     pass: {
-                        nfc: { enabled: true },
+                        nfc: { 
+                            enabled: true,
+                            source: "extId"
+                        },
+                        qr: {
+                            value: mockAddress
+                        },
                         address: mockAddress
                     }
                 })

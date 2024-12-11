@@ -56,7 +56,7 @@ class AuthService {
       }
 
       // Only create pass if verification succeeded
-      const downloadUrl = await passService.createWalletPass(publicKeyStr);
+      const downloadUrl = await passService.getOrCreateWalletPass(publicKeyStr);
       return { downloadUrl };
 
     } catch (error) {
