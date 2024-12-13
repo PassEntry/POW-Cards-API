@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import authController from '../../controllers/authController';
 import authService from '../../services/authService';
 import { TEST_CONSTANTS } from '../testConstants';
+import claimService from '../../services/claimService';
 
 jest.mock('../../services/authService');
+jest.mock('../../services/claimService');
 
 describe('AuthController', () => {
     let mockRequest: Partial<Request>;
@@ -16,10 +18,11 @@ describe('AuthController', () => {
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         
         const mockedAuthService = jest.mocked(authService, { shallow: false });
-        mockedAuthService.createSignInData.mockReturnValue({
+        mockedAuthService.createSignInMessage.mockReturnValue({
             domain: TEST_CONSTANTS.TEST_DOMAIN,
             nonce: TEST_CONSTANTS.MOCKED_NONCE,
-            issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP
+            issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP,
+            message: TEST_CONSTANTS.TEST_MESSAGE
         });
         mockedAuthService.verifySignIn.mockReset();
 
@@ -42,14 +45,14 @@ describe('AuthController', () => {
         consoleErrorSpy.mockRestore();
     });
 
-    test('createSignInData returns 200 status', () => {
+    test('createSignInMessage returns 200 status', () => {
         authController.createSignInData(
             mockRequest as Request, 
             mockResponse as Response
         );
 
         expect(mockResponse.status).toHaveBeenCalledWith(200);
-        expect(authService.createSignInData).toHaveBeenCalledWith(
+        expect(authService.createSignInMessage).toHaveBeenCalledWith(
             TEST_CONSTANTS.TEST_DOMAIN,
             TEST_CONSTANTS.TEST_PUBLIC_KEY
         );
@@ -64,14 +67,15 @@ describe('AuthController', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             domain: TEST_CONSTANTS.TEST_DOMAIN,
             nonce: TEST_CONSTANTS.MOCKED_NONCE,
-            issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP
+            issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP,
+            message: TEST_CONSTANTS.TEST_MESSAGE
         });
     });
 
     test('createSignInData handles errors', () => {
         mockRequest.query = { publicKey: TEST_CONSTANTS.TEST_PUBLIC_KEY };
         
-        jest.mocked(authService).createSignInData.mockImplementationOnce(() => {
+        jest.mocked(authService).createSignInMessage.mockImplementationOnce(() => {
             throw new Error('Service error');
         });
         
@@ -117,7 +121,7 @@ describe('AuthController', () => {
 
         test('returns downloadUrl on successful verification', async () => {
             const mockDownloadUrl = 'https://example.com/pass';
-            jest.mocked(authService).verifySignIn.mockResolvedValueOnce({ 
+            jest.mocked(claimService.handleClaim).mockResolvedValueOnce({ 
                 downloadUrl: mockDownloadUrl 
             });
 
@@ -133,7 +137,7 @@ describe('AuthController', () => {
         });
 
         test('returns 401 on verification failure', async () => {
-            jest.mocked(authService).verifySignIn.mockResolvedValueOnce({ 
+            jest.mocked(claimService.handleClaim).mockResolvedValueOnce({ 
                 reason: 'Invalid signature' 
             });
 
@@ -150,7 +154,7 @@ describe('AuthController', () => {
         });
 
         test('verifySignIn handles service errors', async () => {
-            jest.mocked(authService).verifySignIn.mockRejectedValueOnce(
+            jest.mocked(claimService.handleClaim).mockRejectedValueOnce(
                 new Error('Service error')
             );
 
@@ -160,13 +164,13 @@ describe('AuthController', () => {
             );
 
             expect(consoleErrorSpy).toHaveBeenCalledWith(
-                'Error verifying sign-in:',
+                'Error processing claim:',
                 expect.any(Error)
             );
             expect(mockResponse.status).toHaveBeenCalledWith(500);
             expect(mockResponse.json).toHaveBeenCalledWith({
                 error: 'Internal server error',
-                details: 'Failed to process verification request'
+                details: 'Failed to process claim request'
             });
         });
 

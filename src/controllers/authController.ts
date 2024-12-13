@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import authService from '../services/authService';
+import claimService from '../services/claimService';
 
 export class AuthController {
   createSignInData(req: Request, res: Response): void {
@@ -15,7 +16,7 @@ export class AuthController {
         return;
       }
 
-      const signInData = authService.createSignInData(domain!, publicKey);
+      const signInData = authService.createSignInMessage(domain!, publicKey);
       res.status(200).json(signInData);
     } catch (error) {
       console.error('Error creating sign-in data:', error);
@@ -47,24 +48,22 @@ export class AuthController {
         return;
       }
 
-      const result = await authService.verifySignIn(message, signature, publicKey);
+      const result = await claimService.handleClaim(message, signature, publicKey);
       
-      // If we have a downloadUrl, return just that
       if (result.downloadUrl) {
         res.status(200).json({ downloadUrl: result.downloadUrl });
         return;
       }
 
-      // If verification failed, return 401 Unauthorized
       res.status(401).json({ 
         error: 'Verification failed',
         details: result.reason 
       });
     } catch (error) {
-      console.error('Error verifying sign-in:', error);
+      console.error('Error processing claim:', error);
       res.status(500).json({ 
         error: 'Internal server error',
-        details: 'Failed to process verification request'
+        details: 'Failed to process claim request'
       });
     }
   }
