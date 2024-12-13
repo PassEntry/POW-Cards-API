@@ -101,7 +101,7 @@ Issued At: ${result.issuedAt}`;
                 TEST_CONSTANTS.TEST_DOMAIN,
                 'malicious.com'
             );
-            
+
             // Sign the tampered message
             const messageBytes = new TextEncoder().encode(tamperedMessage);
             const tamperedSignature = nacl.sign.detached(messageBytes, testKeypair.secretKey);
@@ -142,7 +142,7 @@ ${testKeypair.publicKey.toBase58()}`;
             );
 
             expect(result.success).toBe(false);
-            expect(result.reason).toBe('Invalid message format');
+            expect(result.reason).toBe('Message has been tampered with');
         });
 
         test('deletes message after successful verification', async () => {
@@ -226,7 +226,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                 );
 
                 expect(result.success).toBe(false);
-                expect(result.reason).toBe('Invalid message format');
+                expect(result.reason).toBe('Message has been tampered with');
             });
 
             test('rejects message with invalid nonce format', async () => {
@@ -242,7 +242,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                 );
 
                 expect(result.success).toBe(false);
-                expect(result.reason).toBe('Invalid message format');
+                expect(result.reason).toBe('Message has been tampered with');
             });
 
             test('rejects message with invalid timestamp format', async () => {
@@ -258,7 +258,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                 );
 
                 expect(result.success).toBe(false);
-                expect(result.reason).toBe('Invalid message format');
+                expect(result.reason).toBe('Message has been tampered with');
             });
         });
 

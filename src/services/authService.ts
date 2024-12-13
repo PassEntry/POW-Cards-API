@@ -96,25 +96,7 @@ Issued At: ${issuedAt}`;
             };
         }
 
-        // Extract domain for format validation
-        const domainMatch = message.match(/^([^\s]+) wants you to create/);
-        if (!domainMatch) {
-            return {
-                success: false,
-                reason: 'Invalid message format'
-            };
-        }
-        const domain = domainMatch[1];
-
-        // Validate message format
-        if (!this.validateMessageFormat(message, domain, publicKeyStr)) {
-            return {
-                success: false,
-                reason: 'Invalid message format'
-            };
-        }
-
-        // Compare with stored message after format validation
+        // Then compare with stored message
         if (message !== storedData.message) {
             return {
                 success: false,
