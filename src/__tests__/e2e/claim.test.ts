@@ -171,10 +171,10 @@ Issued At: ${issuedAt}`;
             expect(response.status).toBe(500);
             expect(response.body).toEqual({
                 error: 'Internal server error',
-                details: 'Failed to process verification request'
+                details: 'Failed to process claim request'
             });
             expect(console.error).toHaveBeenCalledWith(
-                'Error verifying sign-in:',
+                'Error processing claim:',
                 expect.any(Error)
             );
         });

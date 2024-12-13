@@ -2,8 +2,10 @@ import { Request, Response } from 'express';
 import authController from '../../controllers/authController';
 import authService from '../../services/authService';
 import { TEST_CONSTANTS } from '../testConstants';
+import claimService from '../../services/claimService';
 
 jest.mock('../../services/authService');
+jest.mock('../../services/claimService');
 
 describe('AuthController', () => {
     let mockRequest: Partial<Request>;
@@ -119,7 +121,7 @@ describe('AuthController', () => {
 
         test('returns downloadUrl on successful verification', async () => {
             const mockDownloadUrl = 'https://example.com/pass';
-            jest.mocked(authService).verifySignIn.mockResolvedValueOnce({ 
+            jest.mocked(claimService.handleClaim).mockResolvedValueOnce({ 
                 downloadUrl: mockDownloadUrl 
             });
 
@@ -135,7 +137,7 @@ describe('AuthController', () => {
         });
 
         test('returns 401 on verification failure', async () => {
-            jest.mocked(authService).verifySignIn.mockResolvedValueOnce({ 
+            jest.mocked(claimService.handleClaim).mockResolvedValueOnce({ 
                 reason: 'Invalid signature' 
             });
 
@@ -152,7 +154,7 @@ describe('AuthController', () => {
         });
 
         test('verifySignIn handles service errors', async () => {
-            jest.mocked(authService).verifySignIn.mockRejectedValueOnce(
+            jest.mocked(claimService.handleClaim).mockRejectedValueOnce(
                 new Error('Service error')
             );
 
@@ -162,13 +164,13 @@ describe('AuthController', () => {
             );
 
             expect(consoleErrorSpy).toHaveBeenCalledWith(
-                'Error verifying sign-in:',
+                'Error processing claim:',
                 expect.any(Error)
             );
             expect(mockResponse.status).toHaveBeenCalledWith(500);
             expect(mockResponse.json).toHaveBeenCalledWith({
                 error: 'Internal server error',
-                details: 'Failed to process verification request'
+                details: 'Failed to process claim request'
             });
         });
 

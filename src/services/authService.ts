@@ -2,7 +2,6 @@ import { generateNonce } from '../utils/nonceGenerator';
 import bs58 from 'bs58';
 import nacl from 'tweetnacl';
 import { PublicKey } from '@solana/web3.js';
-import passService from './passService';
 
 interface SignInData {
   domain: string;
@@ -52,25 +51,19 @@ Issued At: ${issuedAt}`;
     return { message, nonce, issuedAt, domain };
   }
 
-  async verifySignIn(message: string, signature: string, publicKeyStr: string): Promise<ClaimResponse> {
+  async verifySignIn(message: string, signature: string, publicKeyStr: string): Promise<VerifyResult> {
     try {
       const verificationResult = await this.verifySignature(message, signature, publicKeyStr);
-      
-      if (!verificationResult.success) {
-        return { reason: verificationResult.reason };
-      }
-
-      // Only create pass if verification succeeded
-      const downloadUrl = await passService.getOrCreateWalletPass(publicKeyStr);
-      return { downloadUrl };
-
+      return verificationResult;
     } catch (error) {
-      console.error('Verification or pass creation error:', error);
-      // Only return reason for verification failures, throw other errors
+      console.error('Verification error:', error);
       if (error instanceof Error && (error as any).isVerificationError) {
-        return { reason: error.message };
+        return { 
+          success: false, 
+          reason: error.message 
+        };
       }
-      throw error; // Let the controller handle pass creation errors
+      throw error;
     }
   }
 

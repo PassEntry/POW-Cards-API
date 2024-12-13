@@ -1,18 +1,14 @@
 import authService from '../../services/authService';
-import passService from '../../services/passService';
 import * as nonceGenerator from '../../utils/nonceGenerator';
 import nacl from 'tweetnacl';
 import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { TEST_CONSTANTS } from '../testConstants';
 
-jest.mock('../../services/passService');
-
 describe('AuthService', () => {
     let originalDateNow: typeof Date.now;
     let originalConsoleError: typeof console.error;
     let testKeypair: Keypair;
-    const mockDownloadUrl = 'https://download.passentry.com/download?pass=mockId';
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -23,8 +19,6 @@ describe('AuthService', () => {
         originalConsoleError = console.error;
         Date.now = jest.fn(() => 1647259200000); // 2022-03-14T12:00:00.000Z
         console.error = jest.fn();
-
-        jest.mocked(passService.getOrCreateWalletPass).mockResolvedValue(mockDownloadUrl);
     });
 
     afterEach(() => {
@@ -90,7 +84,7 @@ Issued At: ${result.issuedAt}`;
                 testKeypair.publicKey.toBase58()
             );
 
-            expect(result.downloadUrl).toBe(mockDownloadUrl);
+            expect(result.success).toBe(true);
             expect(result.reason).toBeUndefined();
         });
 
@@ -118,7 +112,7 @@ Issued At: ${result.issuedAt}`;
                 testKeypair.publicKey.toBase58()
             );
 
-            expect(verifyResult.downloadUrl).toBeUndefined();
+            expect(verifyResult.success).toBe(false);
             expect(verifyResult.reason).toBe('Message has been tampered with');
         });
 
@@ -133,7 +127,7 @@ Issued At: ${result.issuedAt}`;
                 testKeypair.publicKey.toBase58()
             );
 
-            expect(result.downloadUrl).toBeUndefined();
+            expect(result.success).toBe(false);
             expect(result.reason).toBe('Message has expired');
         });
 
@@ -147,7 +141,7 @@ ${testKeypair.publicKey.toBase58()}`;
                 testKeypair.publicKey.toBase58()
             );
 
-            expect(result.downloadUrl).toBeUndefined();
+            expect(result.success).toBe(false);
             expect(result.reason).toBe('Invalid message format');
         });
 
@@ -175,7 +169,7 @@ ${testKeypair.publicKey.toBase58()}`;
                 'invalid-public-key-format'
             );
 
-            expect(verifyResult.downloadUrl).toBeUndefined();
+            expect(verifyResult.success).toBe(false);
             expect(verifyResult.reason).toBe('Invalid public key or signature format');
         });
 
@@ -186,7 +180,7 @@ ${testKeypair.publicKey.toBase58()}`;
                 testKeypair.publicKey.toBase58()
             );
 
-            expect(result.downloadUrl).toBeUndefined();
+            expect(result.success).toBe(false);
             expect(result.reason).toBe('Invalid public key or signature format');
         });
 
@@ -201,7 +195,7 @@ ${testKeypair.publicKey.toBase58()}`;
                 testKeypair.publicKey.toBase58()
             );
 
-            expect(result.downloadUrl).toBeUndefined();
+            expect(result.success).toBe(false);
             expect(result.reason).toBe('Invalid signature');
         });
 
@@ -214,19 +208,8 @@ ${testKeypair.publicKey.toBase58()}`;
                 differentKeypair.publicKey.toBase58()
             );
 
-            expect(result.downloadUrl).toBeUndefined();
+            expect(result.success).toBe(false);
             expect(result.reason).toBe('No active message found for this public key');
-        });
-
-        test('handles pass service errors', async () => {
-            const error = new Error('Service unavailable');
-            jest.mocked(passService.getOrCreateWalletPass).mockRejectedValueOnce(error);
-
-            await expect(authService.verifySignIn(
-                message,
-                bs58.encode(signature),
-                testKeypair.publicKey.toBase58()
-            )).rejects.toThrow('Service unavailable');
         });
 
         describe('message format validation', () => {
@@ -242,7 +225,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                     testKeypair.publicKey.toBase58()
                 );
 
-                expect(result.downloadUrl).toBeUndefined();
+                expect(result.success).toBe(false);
                 expect(result.reason).toBe('Invalid message format');
             });
 
@@ -258,7 +241,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                     testKeypair.publicKey.toBase58()
                 );
 
-                expect(result.downloadUrl).toBeUndefined();
+                expect(result.success).toBe(false);
                 expect(result.reason).toBe('Invalid message format');
             });
 
@@ -274,7 +257,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                     testKeypair.publicKey.toBase58()
                 );
 
-                expect(result.downloadUrl).toBeUndefined();
+                expect(result.success).toBe(false);
                 expect(result.reason).toBe('Invalid message format');
             });
         });
@@ -336,7 +319,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                     testKeypair.publicKey.toBase58()
                 );
 
-                expect(verifyResult.downloadUrl).toBeUndefined();
+                expect(verifyResult.success).toBe(false);
                 expect(verifyResult.reason).toBe('Message has been tampered with');
             });
 
@@ -360,7 +343,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                     testKeypair.publicKey.toBase58()
                 );
 
-                expect(verifyResult.downloadUrl).toBeUndefined();
+                expect(verifyResult.success).toBe(false);
                 expect(verifyResult.reason).toBe('Message has been tampered with');
             });
 
@@ -378,7 +361,7 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                     differentKeypair.publicKey.toBase58()
                 );
 
-                expect(verifyResult.downloadUrl).toBeUndefined();
+                expect(verifyResult.success).toBe(false);
                 expect(verifyResult.reason).toBe('No active message found for this public key');
             });
 
@@ -407,10 +390,10 @@ Issued At: ${new Date().toISOString()}`; // Missing empty line
                 ]);
 
                 // First one should succeed
-                expect(firstResult.downloadUrl).toBeDefined();
+                expect(firstResult.success).toBe(true);
                 
                 // Second one should fail because message was deleted
-                expect(secondResult.downloadUrl).toBeUndefined();
+                expect(secondResult.success).toBe(false);
                 expect(secondResult.reason).toBe('No active message found for this public key');
             });
         });
