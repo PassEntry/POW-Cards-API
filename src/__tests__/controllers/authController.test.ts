@@ -16,10 +16,11 @@ describe('AuthController', () => {
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
         
         const mockedAuthService = jest.mocked(authService, { shallow: false });
-        mockedAuthService.createSignInData.mockReturnValue({
+        mockedAuthService.createSignInMessage.mockReturnValue({
             domain: TEST_CONSTANTS.TEST_DOMAIN,
             nonce: TEST_CONSTANTS.MOCKED_NONCE,
-            issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP
+            issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP,
+            message: TEST_CONSTANTS.TEST_MESSAGE
         });
         mockedAuthService.verifySignIn.mockReset();
 
@@ -42,14 +43,14 @@ describe('AuthController', () => {
         consoleErrorSpy.mockRestore();
     });
 
-    test('createSignInData returns 200 status', () => {
+    test('createSignInMessage returns 200 status', () => {
         authController.createSignInData(
             mockRequest as Request, 
             mockResponse as Response
         );
 
         expect(mockResponse.status).toHaveBeenCalledWith(200);
-        expect(authService.createSignInData).toHaveBeenCalledWith(
+        expect(authService.createSignInMessage).toHaveBeenCalledWith(
             TEST_CONSTANTS.TEST_DOMAIN,
             TEST_CONSTANTS.TEST_PUBLIC_KEY
         );
@@ -64,14 +65,15 @@ describe('AuthController', () => {
         expect(mockResponse.json).toHaveBeenCalledWith({
             domain: TEST_CONSTANTS.TEST_DOMAIN,
             nonce: TEST_CONSTANTS.MOCKED_NONCE,
-            issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP
+            issuedAt: TEST_CONSTANTS.MOCKED_TIMESTAMP,
+            message: TEST_CONSTANTS.TEST_MESSAGE
         });
     });
 
     test('createSignInData handles errors', () => {
         mockRequest.query = { publicKey: TEST_CONSTANTS.TEST_PUBLIC_KEY };
         
-        jest.mocked(authService).createSignInData.mockImplementationOnce(() => {
+        jest.mocked(authService).createSignInMessage.mockImplementationOnce(() => {
             throw new Error('Service error');
         });
         

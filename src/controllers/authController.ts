@@ -15,7 +15,7 @@ export class AuthController {
         return;
       }
 
-      const signInData = authService.createSignInData(domain!, publicKey);
+      const signInData = authService.createSignInMessage(domain!, publicKey);
       res.status(200).json(signInData);
     } catch (error) {
       console.error('Error creating sign-in data:', error);

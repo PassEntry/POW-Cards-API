@@ -30,7 +30,7 @@ describe('Claim Flow E2E', () => {
     });
 
     describe('GET /api/v1/claim/init', () => {
-        test('should create claim data with correct format', async () => {
+        test('should create sign-in message with correct format', async () => {
             const response = await request(app)
                 .get('/api/v1/claim/init')
                 .query({ publicKey: testKeypair.publicKey.toBase58() })
@@ -43,7 +43,8 @@ describe('Claim Flow E2E', () => {
             expect(body).toEqual({
                 domain: expect.any(String),
                 nonce: expect.stringMatching(/^[A-Za-z0-9]{8}$/),
-                issuedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+                issuedAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/),
+                message: expect.any(String)
             });
         });
 
