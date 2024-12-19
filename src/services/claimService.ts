@@ -7,7 +7,12 @@ interface ClaimResponse {
 }
 
 export class ClaimService {
-  async handleClaim(message: string, signature: string, publicKeyStr: string): Promise<ClaimResponse> {
+  async handleClaim(
+    message: string, 
+    signature: string, 
+    publicKeyStr: string,
+    walletType: string = 'generic'
+  ): Promise<ClaimResponse> {
     try {
       // First verify the signature
       const verificationResult = await authService.verifySignIn(message, signature, publicKeyStr);
@@ -17,7 +22,7 @@ export class ClaimService {
       }
 
       // If verification succeeded, create/get the pass
-      const downloadUrl = await passService.getOrCreateWalletPass(publicKeyStr);
+      const downloadUrl = await passService.getOrCreateWalletPass(publicKeyStr, walletType);
       return { downloadUrl };
 
     } catch (error) {

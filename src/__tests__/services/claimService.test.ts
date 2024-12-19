@@ -41,7 +41,7 @@ describe('ClaimService', () => {
             TEST_CONSTANTS.TEST_PUBLIC_KEY
         );
         expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
-            TEST_CONSTANTS.TEST_PUBLIC_KEY
+            TEST_CONSTANTS.TEST_PUBLIC_KEY, "generic"
         );
     });
 
@@ -79,6 +79,51 @@ describe('ClaimService', () => {
         expect(consoleErrorSpy).toHaveBeenCalledWith(
             'Claim processing error:',
             error
+        );
+    });
+
+    test('should handle successful claim with custom walletType', async () => {
+        jest.mocked(authService.verifySignIn).mockResolvedValueOnce({
+            success: true
+        });
+
+        jest.mocked(passService.getOrCreateWalletPass).mockResolvedValueOnce(mockDownloadUrl);
+
+        const result = await claimService.handleClaim(
+            'test message',
+            'test signature',
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'phantom'
+        );
+
+        expect(result).toEqual({ downloadUrl: mockDownloadUrl });
+        expect(authService.verifySignIn).toHaveBeenCalledWith(
+            'test message',
+            'test signature',
+            TEST_CONSTANTS.TEST_PUBLIC_KEY
+        );
+        expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'phantom'
+        );
+    });
+
+    test('should use default walletType when not provided', async () => {
+        jest.mocked(authService.verifySignIn).mockResolvedValueOnce({
+            success: true
+        });
+
+        jest.mocked(passService.getOrCreateWalletPass).mockResolvedValueOnce(mockDownloadUrl);
+
+        await claimService.handleClaim(
+            'test message',
+            'test signature',
+            TEST_CONSTANTS.TEST_PUBLIC_KEY
+        );
+
+        expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'generic'
         );
     });
 }); 

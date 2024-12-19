@@ -92,19 +92,51 @@ Issued At: ${issuedAt}`;
             const messageBytes = new TextEncoder().encode(message);
             const signature = nacl.sign.detached(messageBytes, testKeypair.secretKey);
 
-            // Verify the signature
+            // Verify the signature with custom walletType
             const response = await request(app)
                 .post('/api/v1/claim/wallet-pass')
                 .send({
                     message,
                     signature: bs58.encode(signature),
-                    publicKey: testKeypair.publicKey.toBase58()
+                    publicKey: testKeypair.publicKey.toBase58(),
+                    walletType: 'phantom'
                 });
 
             expect(response.status).toBe(200);
             expect(response.body).toEqual({
                 downloadUrl: mockDownloadUrl
             });
+        });
+
+        test('should use default walletType when not provided', async () => {
+            const initResponse = await request(app)
+                .get('/api/v1/claim/init')
+                .query({ publicKey: testKeypair.publicKey.toBase58() })
+                .set('Host', TEST_CONSTANTS.TEST_DOMAIN);
+
+            const { domain, nonce, issuedAt } = initResponse.body;
+            const message = `${domain} wants you to create a POW card with your Solana account:
+${testKeypair.publicKey.toBase58()}
+
+Nonce: ${nonce}
+Issued At: ${issuedAt}`;
+
+            const messageBytes = new TextEncoder().encode(message);
+            const signature = nacl.sign.detached(messageBytes, testKeypair.secretKey);
+
+            await request(app)
+                .post('/api/v1/claim/wallet-pass')
+                .send({
+                    message,
+                    signature: bs58.encode(signature),
+                    publicKey: testKeypair.publicKey.toBase58()
+                    // walletType intentionally omitted
+                });
+
+            expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
+                testKeypair.publicKey.toBase58(),
+                'generic' // default value
+            );
         });
 
         test('should return 401 with invalid signature', async () => {

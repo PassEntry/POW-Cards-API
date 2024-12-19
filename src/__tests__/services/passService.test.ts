@@ -105,6 +105,67 @@ describe('PassService', () => {
                 })
             );
         });
+
+        test('should return existing pass if found with custom walletType', async () => {
+            global.fetch = jest.fn().mockResolvedValueOnce({
+                ok: true,
+                json: () => Promise.resolve({
+                    data: {
+                        attributes: {
+                            downloadUrl: mockDownloadUrl,
+                            status: 'active'
+                        }
+                    }
+                })
+            });
+
+            const result = await passService.getOrCreateWalletPass(mockAddress, 'phantom');
+
+            expect(result).toBe(mockDownloadUrl);
+            expect(global.fetch).toHaveBeenCalledWith(
+                `https://api.passentry.com/api/v1/passes/${mockAddress}`,
+                expect.objectContaining({
+                    method: 'GET',
+                    headers: {
+                        'Authorization': expect.stringContaining('Bearer ')
+                    }
+                })
+            );
+        });
+
+        test('should create new pass with custom walletType if not found', async () => {
+            global.fetch = jest.fn()
+                .mockResolvedValueOnce({
+                    ok: false,
+                    status: 404,
+                    statusText: 'Not Found',
+                    text: () => Promise.resolve('Not found')
+                })
+                .mockResolvedValueOnce({
+                    ok: true,
+                    json: () => Promise.resolve({
+                        data: {
+                            attributes: {
+                                downloadUrl: mockDownloadUrl,
+                                status: 'issued'
+                            }
+                        }
+                    })
+                });
+
+            const result = await passService.getOrCreateWalletPass(mockAddress, 'phantom');
+
+            expect(result).toBe(mockDownloadUrl);
+            expect(global.fetch).toHaveBeenCalledTimes(2);
+            // Verify the second call (createWalletPass) was made with the custom walletType
+            expect(global.fetch).toHaveBeenLastCalledWith(
+                expect.any(String),
+                expect.objectContaining({
+                    method: 'POST',
+                    body: expect.stringContaining('"address":"' + mockAddress + '"')
+                })
+            );
+        });
     });
 
     test('createWalletPass should create pass successfully', async () => {
