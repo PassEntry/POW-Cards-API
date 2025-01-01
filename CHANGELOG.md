@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.2...v1.1.3) (2025-01-01)
+
+
+### Bug Fixes
+
+* set correct port and add build-essentials [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([3fc1d5d](https://github.com/PassEntry/POW-Cards-API/commit/3fc1d5d2f9e11fecc41695edfcd0d66ea4cd9a7a))
+
 ## [1.1.2](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.1...v1.1.2) (2025-01-01)
 
 
