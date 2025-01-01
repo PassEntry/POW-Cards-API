@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.1...v1.1.2) (2025-01-01)
+
+
+### Bug Fixes
+
+* add curl to docker image [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([7bd57b6](https://github.com/PassEntry/POW-Cards-API/commit/7bd57b68fac795bb08d5d54a01ee1ea6bfe82cbc))
+
 ## [1.1.1](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.0...v1.1.1) (2025-01-01)
 
 
