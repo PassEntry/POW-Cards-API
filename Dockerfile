@@ -1,8 +1,6 @@
 # Build stage
 FROM node:20-alpine AS builder
 
-RUN apk add --no-cache curl
-
 WORKDIR /app
 
 # Copy package files
@@ -17,6 +15,8 @@ COPY tsconfig.json ./
 
 # Production stage
 FROM node:20-alpine
+
+RUN apk add --no-cache curl build-essentials
 
 WORKDIR /app
 
@@ -34,7 +34,7 @@ COPY --from=builder /app/tsconfig.json ./
 COPY --from=builder /app/src ./src
 
 # Expose port (change as needed)
-EXPOSE 3000
+EXPOSE 80
 
 # Start the application with ts-node
 CMD ["npx", "ts-node", "src/server.ts"]
