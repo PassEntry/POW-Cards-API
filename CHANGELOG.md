@@ -1,4 +1,11 @@
-## 1.1.0 (2024-12-31)
+## [1.1.1](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.0...v1.1.1) (2025-01-01)
+
+
+### Bug Fixes
+
+* change health endpoint to health [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([80f61dc](https://github.com/PassEntry/POW-Cards-API/commit/80f61dc3fc5ed5c2b5bb0b8892f7a971ab2aca5e))
+
+## [1.1.0](https://github.com/PassEntry/POW-Cards-API/compare/abd9d20f90cc7c5a9ad637686b670b3817d0bbad...v1.1.0) (2024-12-31)
 
 
 ### Features
