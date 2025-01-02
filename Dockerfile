@@ -13,15 +13,15 @@ RUN npm ci
 COPY . .
 COPY tsconfig.json ./
 
+# Build the application
+RUN npm run build
+
 # Production stage
 FROM node:20-alpine
 
-RUN apk add --no-cache curl build-essentials
+RUN apk add --no-cache curl build-base gmp-dev
 
 WORKDIR /app
-
-# Install ts-node and typescript globally
-RUN npm install -g ts-node typescript
 
 # Copy package files
 COPY package*.json ./
@@ -29,12 +29,11 @@ COPY package*.json ./
 # Install production dependencies
 RUN npm ci --only=production
 
-# Copy TypeScript config and source code from builder
-COPY --from=builder /app/tsconfig.json ./
-COPY --from=builder /app/src ./src
+# Copy built JavaScript files from builder
+COPY --from=builder /app/dist ./dist
 
 # Expose port (change as needed)
 EXPOSE 80
 
-# Start the application with ts-node
-CMD ["npx", "ts-node", "src/server.ts"]
+# Start the application using Node.js (not ts-node)
+CMD ["node", "dist/server.js"]
