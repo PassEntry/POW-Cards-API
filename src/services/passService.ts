@@ -12,7 +12,7 @@ export class PassService {
   private readonly TEMPLATE_ID = '9196360145332bbe96e8283b';
   private readonly API_KEY = process.env.PASSENTRY_API_KEY!;
 
-  async getOrCreateWalletPass(address: string, walletType: string = 'generic'): Promise<string> {
+  async getOrCreateWalletPass(address: string, walletType: string = 'Generic'): Promise<string> {
     try {
       // First try to get existing pass
       const response = await fetch(`${this.API_URL}/${address}`, {
@@ -54,7 +54,7 @@ export class PassService {
     }
   }
 
-  async createWalletPass(address: string, walletType: string = 'generic'): Promise<string> {
+  async createWalletPass(address: string, walletType: string = 'Generic'): Promise<string> {
     try {
         const requestUrl = `${this.API_URL}?passTemplate=${this.TEMPLATE_ID}&extId=${address}`;
         const authHeader = `Bearer ${this.API_KEY}`;

@@ -11,7 +11,7 @@ export class ClaimService {
     message: string, 
     signature: string, 
     publicKeyStr: string,
-    walletType: string = 'generic'
+    walletType: string = 'Generic'
   ): Promise<ClaimResponse> {
     try {
       // First verify the signature

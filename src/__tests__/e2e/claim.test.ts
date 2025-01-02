@@ -135,7 +135,7 @@ Issued At: ${issuedAt}`;
 
             expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
                 testKeypair.publicKey.toBase58(),
-                'generic' // default value
+                'Generic' // default value
             );
         });
 

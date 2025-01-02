@@ -52,7 +52,7 @@ export class AuthController {
         message, 
         signature, 
         publicKey, 
-        walletType || 'generic'
+        walletType || 'Generic'
       );
       
       if (result.downloadUrl) {

@@ -123,7 +123,7 @@ describe('ClaimService', () => {
 
         expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
             TEST_CONSTANTS.TEST_PUBLIC_KEY,
-            'generic'
+            'Generic'
         );
     });
 }); 
