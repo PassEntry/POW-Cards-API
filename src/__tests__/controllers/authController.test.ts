@@ -115,7 +115,8 @@ describe('AuthController', () => {
             mockRequest.body = {
                 message: TEST_CONSTANTS.TEST_MESSAGE,
                 signature: TEST_CONSTANTS.TEST_SIGNATURE,
-                publicKey: TEST_CONSTANTS.TEST_PUBLIC_KEY
+                publicKey: TEST_CONSTANTS.TEST_PUBLIC_KEY,
+                walletType: 'Generic'
             };
         });
 
@@ -130,10 +131,38 @@ describe('AuthController', () => {
                 mockResponse as Response
             );
 
+            expect(claimService.handleClaim).toHaveBeenCalledWith(
+                TEST_CONSTANTS.TEST_MESSAGE,
+                TEST_CONSTANTS.TEST_SIGNATURE,
+                TEST_CONSTANTS.TEST_PUBLIC_KEY,
+                'Generic'
+            );
             expect(mockResponse.status).toHaveBeenCalledWith(200);
             expect(mockResponse.json).toHaveBeenCalledWith({ 
                 downloadUrl: mockDownloadUrl 
             });
+        });
+
+        test('handles custom wallet type', async () => {
+            mockRequest.body.walletType = 'Phantom';
+            const mockDownloadUrl = 'https://example.com/pass';
+            
+            jest.mocked(claimService.handleClaim).mockResolvedValueOnce({ 
+                downloadUrl: mockDownloadUrl 
+            });
+
+            await authController.verifySignIn(
+                mockRequest as Request, 
+                mockResponse as Response
+            );
+
+            expect(claimService.handleClaim).toHaveBeenCalledWith(
+                TEST_CONSTANTS.TEST_MESSAGE,
+                TEST_CONSTANTS.TEST_SIGNATURE,
+                TEST_CONSTANTS.TEST_PUBLIC_KEY,
+                'Phantom'
+            );
+            expect(mockResponse.status).toHaveBeenCalledWith(200);
         });
 
         test('returns 401 on verification failure', async () => {
@@ -189,6 +218,23 @@ describe('AuthController', () => {
             expect(mockResponse.json).toHaveBeenCalledWith({
                 error: 'Invalid request',
                 details: 'Invalid request format'
+            });
+        });
+
+        test('verifySignIn handles missing required fields', async () => {
+            mockRequest.body = {
+                message: TEST_CONSTANTS.TEST_MESSAGE,
+            };
+
+            await authController.verifySignIn(
+                mockRequest as Request,
+                mockResponse as Response
+            );
+
+            expect(mockResponse.status).toHaveBeenCalledWith(400);
+            expect(mockResponse.json).toHaveBeenCalledWith({
+                error: 'Missing required fields',
+                details: 'Message, signature, and publicKey are required'
             });
         });
     });

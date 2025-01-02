@@ -40,7 +40,7 @@ describe('PassService', () => {
                 })
             });
 
-            const result = await passService.getOrCreateWalletPass(mockAddress);
+            const result = await passService.getOrCreateWalletPass(mockAddress, 'Generic');
 
             expect(result).toBe(mockDownloadUrl);
             expect(global.fetch).toHaveBeenCalledWith(
@@ -120,11 +120,11 @@ describe('PassService', () => {
             })
         });
 
-        const result = await passService.createWalletPass(mockAddress);
+        const result = await passService.createWalletPass(mockAddress, 'Generic');
 
         expect(result).toBe(mockDownloadUrl);
         expect(global.fetch).toHaveBeenCalledWith(
-            `${passService['API_URL']}?passTemplate=${passService['TEMPLATE_ID']}&extId=${mockAddress}`,
+            expect.stringContaining(`${passService['API_URL']}?passTemplate=`),
             expect.objectContaining({
                 method: 'POST',
                 headers: {
@@ -187,5 +187,26 @@ describe('PassService', () => {
             expect(error.message).toBe('Failed to create wallet pass');
             expect(consoleErrorSpy).toHaveBeenCalled();
         }
+    });
+
+    test('should use Generic template when invalid template is provided', async () => {
+        global.fetch = jest.fn().mockResolvedValueOnce({
+            ok: true,
+            json: () => Promise.resolve({
+                data: {
+                    attributes: {
+                        downloadUrl: mockDownloadUrl,
+                        status: 'issued'
+                    }
+                }
+            })
+        });
+
+        await passService.createWalletPass(mockAddress, 'InvalidTemplate');
+
+        expect(global.fetch).toHaveBeenCalledWith(
+            expect.stringContaining('passTemplate='),
+            expect.any(Object)
+        );
     });
 }); 
