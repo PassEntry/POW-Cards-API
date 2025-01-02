@@ -31,7 +31,8 @@ describe('ClaimService', () => {
         const result = await claimService.handleClaim(
             'test message',
             'test signature',
-            TEST_CONSTANTS.TEST_PUBLIC_KEY
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'Generic'
         );
 
         expect(result).toEqual({ downloadUrl: mockDownloadUrl });
@@ -41,7 +42,31 @@ describe('ClaimService', () => {
             TEST_CONSTANTS.TEST_PUBLIC_KEY
         );
         expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
-            TEST_CONSTANTS.TEST_PUBLIC_KEY
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'Generic'
+        );
+    });
+
+    test('should handle successful claim with custom wallet type', async () => {
+        // Mock successful verification
+        jest.mocked(authService.verifySignIn).mockResolvedValueOnce({
+            success: true
+        });
+
+        // Mock successful pass creation
+        jest.mocked(passService.getOrCreateWalletPass).mockResolvedValueOnce(mockDownloadUrl);
+
+        const result = await claimService.handleClaim(
+            'test message',
+            'test signature',
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'Phantom'
+        );
+
+        expect(result).toEqual({ downloadUrl: mockDownloadUrl });
+        expect(passService.getOrCreateWalletPass).toHaveBeenCalledWith(
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'Phantom'
         );
     });
 
@@ -55,7 +80,8 @@ describe('ClaimService', () => {
         const result = await claimService.handleClaim(
             'test message',
             'test signature',
-            TEST_CONSTANTS.TEST_PUBLIC_KEY
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'Generic'
         );
 
         expect(result).toEqual({ reason: failureReason });
@@ -73,7 +99,8 @@ describe('ClaimService', () => {
         await expect(claimService.handleClaim(
             'test message',
             'test signature',
-            TEST_CONSTANTS.TEST_PUBLIC_KEY
+            TEST_CONSTANTS.TEST_PUBLIC_KEY,
+            'Generic'
         )).rejects.toThrow('Failed to create pass');
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(

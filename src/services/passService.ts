@@ -1,3 +1,5 @@
+import { WALLET_TEMPLATE_IDS, WalletTemplateType } from "../config/walletConfig";
+
 interface PassEntryResponse {
   data: {
     attributes: {
@@ -9,10 +11,13 @@ interface PassEntryResponse {
 
 export class PassService {
   private readonly API_URL = 'https://api.passentry.com/api/v1/passes';
-  private readonly TEMPLATE_ID = '9196360145332bbe96e8283b';
   private readonly API_KEY = process.env.PASSENTRY_API_KEY!;
 
-  async getOrCreateWalletPass(address: string): Promise<string> {
+  private isValidTemplate(template: string): template is WalletTemplateType {
+    return template in WALLET_TEMPLATE_IDS;
+  }
+
+  async getOrCreateWalletPass(address: string, template: string = 'Generic'): Promise<string> {
     try {
       // First try to get existing pass
       const response = await fetch(`${this.API_URL}/${address}`, {
@@ -40,7 +45,7 @@ export class PassService {
       }
 
       // If 404, create new pass
-      return this.createWalletPass(address);
+      return this.createWalletPass(address, template);
 
     } catch (error) {
       // Only wrap network/unexpected errors
@@ -54,9 +59,12 @@ export class PassService {
     }
   }
 
-  async createWalletPass(address: string): Promise<string> {
+  async createWalletPass(address: string, template: string = 'Generic'): Promise<string> {
     try {
-        const requestUrl = `${this.API_URL}?passTemplate=${this.TEMPLATE_ID}&extId=${address}`;
+        console.log(template)
+        const validTemplate = this.isValidTemplate(template) ? template : 'Generic';
+        const templateId = WALLET_TEMPLATE_IDS[validTemplate];
+        const requestUrl = `${this.API_URL}?passTemplate=${templateId}&extId=${address}`;
         const authHeader = `Bearer ${this.API_KEY}`;
         
         const response = await fetch(requestUrl, {
