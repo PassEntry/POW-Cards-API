@@ -1,6 +1,6 @@
 {
   "name": "pow-cards-nodejs",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "POW Cards Node.js Server",
   "main": "dist/server.js",
   "scripts": {
