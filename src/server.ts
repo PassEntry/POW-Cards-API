@@ -16,6 +16,10 @@ app.use(express.json());
 app.use('/api/v1/claim', claimRoutes);
 app.use('/health', healthRoutes);
 
+app.get('/test', (req, res) => {
+    res.json({ message: 'Test route working' });
+});
+
 if (require.main === module) {
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
