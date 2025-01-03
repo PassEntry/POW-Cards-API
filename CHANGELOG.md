@@ -1,3 +1,10 @@
+## [1.3.0](https://github.com/PassEntry/POW-Cards-API/compare/v1.2.0...v1.3.0) (2025-01-02)
+
+
+### Features
+
+* Add wallet templates for multiple wallet types (Phantom, Solflare, Coinbase etc.) ([3c3b0d7](https://github.com/PassEntry/POW-Cards-API/commit/3c3b0d7210626bae9e46ae490156e2a1d740ef9d))
+
 ## [1.2.0](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.4...v1.2.0) (2025-01-02)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * add curl to docker image [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([7bd57b6](https://github.com/PassEntry/POW-Cards-API/commit/7bd57b68fac795bb08d5d54a01ee1ea6bfe82cbc))
-
-## [1.1.1](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.0...v1.1.1) (2025-01-01)
-
-
-### Bug Fixes
-
-* change health endpoint to health [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([80f61dc](https://github.com/PassEntry/POW-Cards-API/commit/80f61dc3fc5ed5c2b5bb0b8892f7a971ab2aca5e))
 

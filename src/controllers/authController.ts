@@ -38,7 +38,7 @@ export class AuthController {
         return;
       }
 
-      const { message, signature, publicKey } = req.body;
+      const { message, signature, publicKey, walletType } = req.body;
 
       if (!message || !signature || !publicKey) {
         res.status(400).json({ 
@@ -48,7 +48,7 @@ export class AuthController {
         return;
       }
 
-      const result = await claimService.handleClaim(message, signature, publicKey);
+      const result = await claimService.handleClaim(message, signature, publicKey, walletType);
       
       if (result.downloadUrl) {
         res.status(200).json({ downloadUrl: result.downloadUrl });
