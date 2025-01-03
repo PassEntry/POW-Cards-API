@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.1...v1.4.2) (2025-01-03)
+
+
+### Bug Fixes
+
+* Move package to passentry organisation ([ebe1e47](https://github.com/PassEntry/POW-Cards-API/commit/ebe1e47e79d046d7f502faddcec582fcf38fa842))
+
 ## [1.4.1](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.0...v1.4.1) (2025-01-03)
 
 
@@ -25,11 +32,4 @@
 ### Features
 
 * auto deploy staging [[PS-1309](https://passentry.atlassian.net/browse/PS-1309)] ([0235829](https://github.com/PassEntry/POW-Cards-API/commit/02358290c6ff5317bfe3e7cf5e9e437394da11bc))
-
-## [1.1.4](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.3...v1.1.4) (2025-01-02)
-
-
-### Bug Fixes
-
-* healthcheck endpoint [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([cff5596](https://github.com/PassEntry/POW-Cards-API/commit/cff5596c028100acad4021e7a2f36efb5e61b8d2))
 
