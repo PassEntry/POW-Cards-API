@@ -1,3 +1,10 @@
+## [1.4.0](https://github.com/PassEntry/POW-Cards-API/compare/v1.3.0...v1.4.0) (2025-01-03)
+
+
+### Features
+
+* Add generate typescript sdk ([6f5f045](https://github.com/PassEntry/POW-Cards-API/commit/6f5f045c90b2a0b9551fc6339af3f966217f969f))
+
 ## [1.3.0](https://github.com/PassEntry/POW-Cards-API/compare/v1.2.0...v1.3.0) (2025-01-02)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * set correct port and add build-essentials [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([3fc1d5d](https://github.com/PassEntry/POW-Cards-API/commit/3fc1d5d2f9e11fecc41695edfcd0d66ea4cd9a7a))
-
-## [1.1.2](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.1...v1.1.2) (2025-01-01)
-
-
-### Bug Fixes
-
-* add curl to docker image [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([7bd57b6](https://github.com/PassEntry/POW-Cards-API/commit/7bd57b68fac795bb08d5d54a01ee1ea6bfe82cbc))
 
