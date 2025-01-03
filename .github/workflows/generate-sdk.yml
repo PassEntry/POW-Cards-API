@@ -1,0 +1,50 @@
+name: Generate SDK
+
+# on:
+#   release:
+#     types: [published]
+
+on:
+    pull_request:
+      branches: [main]
+
+jobs:
+  generate-typescript-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get release version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Generate TypeScript SDK
+        run: |
+          docker run --rm -v "$(pwd)":/local openapitools/openapi-generator-cli generate \
+            -i /local/openapi.yaml \
+            -g typescript-fetch \
+            -o /local/sdks/typescript \
+            --additional-properties=npmName=pow-cards-client,npmVersion=${{ env.VERSION }},supportsES6=true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build and Publish SDK
+        run: |
+          cd sdks/typescript
+          npm install
+          npm run build
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Commit SDK Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add sdks/typescript
+          git commit -m "chore: update TypeScript SDK to version ${{ env.VERSION }}"
+          git push 

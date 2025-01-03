@@ -54,7 +54,7 @@ PASSENTRY_API_KEY=""
 
 ### Health Check
 ```
-GET /api/v1/health
+GET /health
 ```
 
 ### Initialize Claim Process

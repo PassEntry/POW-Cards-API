@@ -1,0 +1,221 @@
+openapi: 3.0.0
+info:
+  title: POW Cards API
+  version: '1.0.0'
+  description: API for creating and managing POW wallet cards with Solana authentication
+  contact:
+    name: PassEntry Team
+    email: info@passentry.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: https://api.pow.cards
+    description: Production server
+externalDocs:
+  description: Learn more about POW Cards
+  url: https://pow.cards
+tags:
+  - name: Claims
+    description: Claim process endpoints
+  - name: Health
+    description: Health check endpoints
+security:
+  - ApiKeyAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-KEY
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: checkApiHealth
+      summary: Check API health
+      description: Returns the health status of the API
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+  /api/v1/claim/init:
+    get:
+      tags:
+        - Claims
+      operationId: initializeClaimProcess
+      summary: Initialize claim process
+      description: >
+        Generates a sign-in message that the user must sign to verify their identity
+        using their Solana wallet.
+      parameters:
+        - in: query
+          name: publicKey
+          required: true
+          schema:
+            type: string
+            example: "Gg7Q5nmWKL2UygFr6BJRoAE6GkJ3dsHfCZ7N8s3yG6Fe"
+          description: Solana wallet public key
+      responses:
+        '200':
+          description: Sign-in message created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  domain:
+                    type: string
+                    example: "pow.cards"
+                  nonce:
+                    type: string
+                    pattern: '^[A-Za-z0-9]{8}$'
+                    example: "Aa7bCd3f"
+                  issuedAt:
+                    type: string
+                    format: date-time
+                    example: "2024-03-14T12:00:00Z"
+                  message:
+                    type: string
+                    example: "pow.cards wants you to create a POW card with your Solana account:\nGg7Q5nmWKL2UygFr6BJRoAE6GkJ3dsHfCZ7N8s3yG6Fe\n\nNonce: Aa7bCd3f\nIssued At: 2024-03-14T12:00:00Z"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid request"
+                  details:
+                    type: string
+                    example: "Public key is required"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Too many claim attempts, please try again later"
+  /api/v1/claim/wallet-pass:
+    post:
+      tags:
+        - Claims
+      operationId: verifySignatureAndCreatePass
+      summary: Verify signature and create wallet pass
+      description: >
+        Verifies the signed message and creates a wallet pass if the signature
+        is valid.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+                - signature
+                - publicKey
+              properties:
+                message:
+                  type: string
+                  description: The signed message from /claim/init
+                signature:
+                  type: string
+                  description: Base58 encoded signature
+                publicKey:
+                  type: string
+                  description: Solana wallet public key
+                  example: "Gg7Q5nmWKL2UygFr6BJRoAE6GkJ3dsHfCZ7N8s3yG6Fe"
+                walletType:
+                  type: string
+                  enum: [
+                    "Generic",
+                    "Phantom",
+                    "Solflare",
+                    "Coinbase Wallet",
+                    "MathWallet",
+                    "SafePal",
+                    "Clover",
+                    "Coin98",
+                    "HyperPay",
+                    "Krystal",
+                    "ONTO",
+                    "TokenPocket",
+                    "Trust"
+                  ]
+                  description: Type of wallet used for signing
+                  default: "Generic"
+      responses:
+        '200':
+          description: Pass created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  downloadUrl:
+                    type: string
+                    format: uri
+                    example: "https://download.passentry.com/download?pass=mockId"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Missing required fields"
+                  details:
+                    type: string
+                    example: "Message, signature, and publicKey are required"
+        '401':
+          description: Verification failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Verification failed"
+                  details:
+                    type: string
+                    example: "Invalid signature"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Too many claim attempts, please try again later"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
+                  details:
+                    type: string
+                    example: "Failed to process claim request"
