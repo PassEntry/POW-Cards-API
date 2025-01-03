@@ -1,5 +1,5 @@
 {
-  "name": "pow-cards-client",
+  "name": "@passentry/pow-cards-client",
   "version": "1.0.1",
   "description": "OpenAPI client for pow-cards-client",
   "author": "OpenAPI-Generator",

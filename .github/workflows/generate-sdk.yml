@@ -20,13 +20,14 @@ jobs:
             -i /local/openapi.yaml \
             -g typescript-fetch \
             -o /local/sdks/typescript \
-            --additional-properties=npmName=pow-cards-client,npmVersion=${{ env.VERSION }},supportsES6=true
+            --additional-properties=npmName=@passentry/pow-cards-client,npmVersion=${{ env.VERSION }},supportsES6=true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+          scope: '@passentry'
 
       - name: Build and Publish SDK
         run: |
