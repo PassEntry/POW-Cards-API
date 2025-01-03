@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.0...v1.4.1) (2025-01-03)
+
+
+### Bug Fixes
+
+* fake commit to sim release ([5ff7dce](https://github.com/PassEntry/POW-Cards-API/commit/5ff7dce5b679c794c93b09c6bb868f13c2f2e4e2))
+
 ## [1.4.0](https://github.com/PassEntry/POW-Cards-API/compare/v1.3.0...v1.4.0) (2025-01-03)
 
 
@@ -25,11 +32,4 @@
 ### Bug Fixes
 
 * healthcheck endpoint [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([cff5596](https://github.com/PassEntry/POW-Cards-API/commit/cff5596c028100acad4021e7a2f36efb5e61b8d2))
-
-## [1.1.3](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.2...v1.1.3) (2025-01-01)
-
-
-### Bug Fixes
-
-* set correct port and add build-essentials [[PS-1310](https://passentry.atlassian.net/browse/PS-1310)] ([3fc1d5d](https://github.com/PassEntry/POW-Cards-API/commit/3fc1d5d2f9e11fecc41695edfcd0d66ea4cd9a7a))
 
