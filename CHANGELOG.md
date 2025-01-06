@@ -1,3 +1,10 @@
+## [1.4.5](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.4...v1.4.5) (2025-01-06)
+
+
+### Bug Fixes
+
+* fake commit to simulate release ([a13c112](https://github.com/PassEntry/POW-Cards-API/commit/a13c11281c2280a8f602070686d6f4babb998859))
+
 ## [1.4.4](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.3...v1.4.4) (2025-01-06)
 
 
@@ -27,11 +34,4 @@
 ### Bug Fixes
 
 * fake commit to sim release ([5ff7dce](https://github.com/PassEntry/POW-Cards-API/commit/5ff7dce5b679c794c93b09c6bb868f13c2f2e4e2))
-
-## [1.4.0](https://github.com/PassEntry/POW-Cards-API/compare/v1.3.0...v1.4.0) (2025-01-03)
-
-
-### Features
-
-* Add generate typescript sdk ([6f5f045](https://github.com/PassEntry/POW-Cards-API/commit/6f5f045c90b2a0b9551fc6339af3f966217f969f))
 
