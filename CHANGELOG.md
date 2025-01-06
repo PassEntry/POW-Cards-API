@@ -1,3 +1,10 @@
+## [1.4.6](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.5...v1.4.6) (2025-01-06)
+
+
+### Bug Fixes
+
+* Pull main before creating sdk commit ([b2feee0](https://github.com/PassEntry/POW-Cards-API/commit/b2feee03d59f6f963818c93d7f6f080a205f5cc3))
+
 ## [1.4.5](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.4...v1.4.5) (2025-01-06)
 
 
@@ -27,11 +34,4 @@
 ### Bug Fixes
 
 * Move package to passentry organisation ([ebe1e47](https://github.com/PassEntry/POW-Cards-API/commit/ebe1e47e79d046d7f502faddcec582fcf38fa842))
-
-## [1.4.1](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.0...v1.4.1) (2025-01-03)
-
-
-### Bug Fixes
-
-* fake commit to sim release ([5ff7dce](https://github.com/PassEntry/POW-Cards-API/commit/5ff7dce5b679c794c93b09c6bb868f13c2f2e4e2))
 
