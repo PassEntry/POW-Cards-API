@@ -140,6 +140,7 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+          git pull origin main
           git add sdks/typescript
           git commit -m "chore: update TypeScript SDK to version ${{ needs.release.outputs.tag }}"
           git push origin main
