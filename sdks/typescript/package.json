@@ -1,7 +1,7 @@
 {
   "name": "@passentry/pow-cards-client",
-  "version": "1.0.1",
-  "description": "OpenAPI client for pow-cards-client",
+  "version": "v1.4.6",
+  "description": "OpenAPI client for @passentry/pow-cards-client",
   "author": "OpenAPI-Generator",
   "repository": {
     "type": "git",
