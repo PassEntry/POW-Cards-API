@@ -1,3 +1,10 @@
+## [1.4.4](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.3...v1.4.4) (2025-01-06)
+
+
+### Bug Fixes
+
+* fake commit to simulate release ([c797896](https://github.com/PassEntry/POW-Cards-API/commit/c79789672b12a019e8cbd4581523757f5574c06e))
+
 ## [1.4.3](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.2...v1.4.3) (2025-01-06)
 
 
@@ -27,11 +34,4 @@
 ### Features
 
 * Add generate typescript sdk ([6f5f045](https://github.com/PassEntry/POW-Cards-API/commit/6f5f045c90b2a0b9551fc6339af3f966217f969f))
-
-## [1.3.0](https://github.com/PassEntry/POW-Cards-API/compare/v1.2.0...v1.3.0) (2025-01-02)
-
-
-### Features
-
-* Add wallet templates for multiple wallet types (Phantom, Solflare, Coinbase etc.) ([3c3b0d7](https://github.com/PassEntry/POW-Cards-API/commit/3c3b0d7210626bae9e46ae490156e2a1d740ef9d))
 
