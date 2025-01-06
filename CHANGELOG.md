@@ -1,3 +1,12 @@
+## [1.4.3](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.2...v1.4.3) (2025-01-06)
+
+
+### Bug Fixes
+
+* Fake commit to simulate release ([39fe2bc](https://github.com/PassEntry/POW-Cards-API/commit/39fe2bc8fcdfa631616bf2cb33189f00db3cf130))
+* Revert main.yaml to working state ([cf6abab](https://github.com/PassEntry/POW-Cards-API/commit/cf6abab6562557938fa40385bf3782b03bca55e8))
+* Simplify generate sdk action ([3d1bce2](https://github.com/PassEntry/POW-Cards-API/commit/3d1bce2a4aae1ef9321fd51287fffa3438b6c5b4))
+
 ## [1.4.2](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.1...v1.4.2) (2025-01-03)
 
 
@@ -25,11 +34,4 @@
 ### Features
 
 * Add wallet templates for multiple wallet types (Phantom, Solflare, Coinbase etc.) ([3c3b0d7](https://github.com/PassEntry/POW-Cards-API/commit/3c3b0d7210626bae9e46ae490156e2a1d740ef9d))
-
-## [1.2.0](https://github.com/PassEntry/POW-Cards-API/compare/v1.1.4...v1.2.0) (2025-01-02)
-
-
-### Features
-
-* auto deploy staging [[PS-1309](https://passentry.atlassian.net/browse/PS-1309)] ([0235829](https://github.com/PassEntry/POW-Cards-API/commit/02358290c6ff5317bfe3e7cf5e9e437394da11bc))
 
