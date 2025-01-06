@@ -71,6 +71,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - domain
+                  - nonce
+                  - issuedAt
+                  - message
                 properties:
                   domain:
                     type: string
@@ -165,6 +170,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - downloadUrl
                 properties:
                   downloadUrl:
                     type: string
