@@ -1,11 +1,12 @@
 name: main
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
 
 jobs:
-  release:
+  release: 
     runs-on: ubuntu-latest
     permissions:
       contents: 'write'
@@ -36,37 +37,87 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '22.4.1'
-          registry-url: 'https://registry.npmjs.org'
-          scope: '@passentry'
 
-      - name: Get release version
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+      - name: Install dependencies
+        run: npm install
 
-      - name: Generate SDK
-        if: success()
-        run: |
-          docker run --rm -v "$(pwd)":/local openapitools/openapi-generator-cli generate \
-            -i /local/openapi.yaml \
-            -g typescript-fetch \
-            -o /local/sdks/typescript \
-            --additional-properties=npmName=@passentry/pow-cards-client,npmVersion=${{ env.VERSION }},supportsES6=true
+      - name: Check Git version
+        run: git --version
 
-      - name: Publish SDK
-        if: success()
-        run: |
-          cd sdks/typescript
-          npm install
-          npm run build
-          npm publish --access public
+      - name: Conventional Changelog Action
+        id: changelog
+        uses: TriPSs/conventional-changelog-action@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          config-file-path: .github/workflows/conventional-commit.cjs
+          output-file: CHANGELOG.md
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        if: ${{ steps.changelog.outputs.skipped == 'false' }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.github_token }}
+        with:
+          tag_name: ${{ steps.changelog.outputs.tag }}
+          release_name: ${{ steps.changelog.outputs.tag }}
+          body: ${{ steps.changelog.outputs.clean_changelog }}
+    outputs:
+      tag: ${{ steps.changelog.outputs.tag }}
+      released: ${{ steps.changelog.outputs.skipped == 'false' }}
 
-      - name: Commit SDK Changes
-        if: success()
+  build:
+    needs: release
+    if: ${{ needs.release.outputs.released == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Debug Outputs
         run: |
-          git add sdks/typescript
-          git commit -m "chore: update TypeScript SDK to version ${{ env.VERSION }}"
-          git push
+          echo "ECR Registry: ${{ steps.login-ecr.outputs.registry }}"
+          echo "ECR Repository: ${{ steps.login-ecr.outputs.registry }}/passentry-images"
+          echo "Image Tag: passentry-frontend-${{ needs.release.outputs.tag }}"
+
+      - name: Build, tag, and push Docker image
+        env:
+          ECR_REGISTORY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: pow-api
+          IMAGE_TAG: '${{ needs.release.outputs.tag }}'
+        run: |
+          DOCKER_BUILDKIT=1 docker build -t $ECR_REPOSITORY .
+          echo "built image"
+          docker tag $ECR_REPOSITORY $ECR_REGISTORY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "tagged image"
+          docker tag $ECR_REPOSITORY $ECR_REGISTORY/$ECR_REPOSITORY:latest
+          echo "tagged latest image"
+          docker push --all-tags $ECR_REGISTORY/$ECR_REPOSITORY
+          echo "pushed image"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEPLOY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEPLOY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --force-new-deployment
 
     
