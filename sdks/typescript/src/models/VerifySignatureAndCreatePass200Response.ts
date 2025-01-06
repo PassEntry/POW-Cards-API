@@ -24,13 +24,14 @@ export interface VerifySignatureAndCreatePass200Response {
      * @type {string}
      * @memberof VerifySignatureAndCreatePass200Response
      */
-    downloadUrl?: string;
+    downloadUrl: string;
 }
 
 /**
  * Check if a given object implements the VerifySignatureAndCreatePass200Response interface.
  */
 export function instanceOfVerifySignatureAndCreatePass200Response(value: object): value is VerifySignatureAndCreatePass200Response {
+    if (!('downloadUrl' in value) || value['downloadUrl'] === undefined) return false;
     return true;
 }
 
@@ -44,7 +45,7 @@ export function VerifySignatureAndCreatePass200ResponseFromJSONTyped(json: any, 
     }
     return {
         
-        'downloadUrl': json['downloadUrl'] == null ? undefined : json['downloadUrl'],
+        'downloadUrl': json['downloadUrl'],
     };
 }
 

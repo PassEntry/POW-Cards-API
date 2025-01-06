@@ -24,31 +24,35 @@ export interface InitializeClaimProcess200Response {
      * @type {string}
      * @memberof InitializeClaimProcess200Response
      */
-    domain?: string;
+    domain: string;
     /**
      * 
      * @type {string}
      * @memberof InitializeClaimProcess200Response
      */
-    nonce?: string;
+    nonce: string;
     /**
      * 
      * @type {Date}
      * @memberof InitializeClaimProcess200Response
      */
-    issuedAt?: Date;
+    issuedAt: Date;
     /**
      * 
      * @type {string}
      * @memberof InitializeClaimProcess200Response
      */
-    message?: string;
+    message: string;
 }
 
 /**
  * Check if a given object implements the InitializeClaimProcess200Response interface.
  */
 export function instanceOfInitializeClaimProcess200Response(value: object): value is InitializeClaimProcess200Response {
+    if (!('domain' in value) || value['domain'] === undefined) return false;
+    if (!('nonce' in value) || value['nonce'] === undefined) return false;
+    if (!('issuedAt' in value) || value['issuedAt'] === undefined) return false;
+    if (!('message' in value) || value['message'] === undefined) return false;
     return true;
 }
 
@@ -62,10 +66,10 @@ export function InitializeClaimProcess200ResponseFromJSONTyped(json: any, ignore
     }
     return {
         
-        'domain': json['domain'] == null ? undefined : json['domain'],
-        'nonce': json['nonce'] == null ? undefined : json['nonce'],
-        'issuedAt': json['issuedAt'] == null ? undefined : (new Date(json['issuedAt'])),
-        'message': json['message'] == null ? undefined : json['message'],
+        'domain': json['domain'],
+        'nonce': json['nonce'],
+        'issuedAt': (new Date(json['issuedAt'])),
+        'message': json['message'],
     };
 }
 
@@ -82,7 +86,7 @@ export function InitializeClaimProcess200ResponseToJSONTyped(value?: InitializeC
         
         'domain': value['domain'],
         'nonce': value['nonce'],
-        'issuedAt': value['issuedAt'] == null ? undefined : ((value['issuedAt']).toISOString()),
+        'issuedAt': ((value['issuedAt']).toISOString()),
         'message': value['message'],
     };
 }
