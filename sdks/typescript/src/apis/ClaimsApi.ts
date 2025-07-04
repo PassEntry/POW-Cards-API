@@ -80,8 +80,11 @@ export class ClaimsApi extends runtime.BaseAPI {
             headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
         }
 
+
+        let urlPath = `/api/v1/claim/init`;
+
         const response = await this.request({
-            path: `/api/v1/claim/init`,
+            path: urlPath,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -121,8 +124,11 @@ export class ClaimsApi extends runtime.BaseAPI {
             headerParameters["X-API-KEY"] = await this.configuration.apiKey("X-API-KEY"); // ApiKeyAuth authentication
         }
 
+
+        let urlPath = `/api/v1/claim/wallet-pass`;
+
         const response = await this.request({
-            path: `/api/v1/claim/wallet-pass`,
+            path: urlPath,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
