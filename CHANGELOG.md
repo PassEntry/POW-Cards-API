@@ -1,3 +1,10 @@
+## [1.4.8](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.7...v1.4.8) (2025-07-04)
+
+
+### Bug Fixes
+
+* oicd aws credentials with github actions [[PS-2002](https://passentry.atlassian.net/browse/PS-2002)] ([5655402](https://github.com/PassEntry/POW-Cards-API/commit/5655402b7b3fc285d8639b0ce775cc71fbd98ac8))
+
 ## [1.4.7](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.6...v1.4.7) (2025-01-06)
 
 
@@ -25,13 +32,4 @@
 ### Bug Fixes
 
 * fake commit to simulate release ([c797896](https://github.com/PassEntry/POW-Cards-API/commit/c79789672b12a019e8cbd4581523757f5574c06e))
-
-## [1.4.3](https://github.com/PassEntry/POW-Cards-API/compare/v1.4.2...v1.4.3) (2025-01-06)
-
-
-### Bug Fixes
-
-* Fake commit to simulate release ([39fe2bc](https://github.com/PassEntry/POW-Cards-API/commit/39fe2bc8fcdfa631616bf2cb33189f00db3cf130))
-* Revert main.yaml to working state ([cf6abab](https://github.com/PassEntry/POW-Cards-API/commit/cf6abab6562557938fa40385bf3782b03bca55e8))
-* Simplify generate sdk action ([3d1bce2](https://github.com/PassEntry/POW-Cards-API/commit/3d1bce2a4aae1ef9321fd51287fffa3438b6c5b4))
 
